@@ -1,6 +1,6 @@
 [
   {
-    "ParameterKey": "BucketName",
-    "ParameterValue": "irenejia-stelligent-practice-bucket"
+    "ParameterKey": "UserName",
+    "ParameterValue": "ireneTestUser"
   }
 ]

@@ -1,0 +1,34 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Pratice template from Irene Jia'
+
+Parameters:
+  UserName:
+    Type: String
+
+Resources:
+  MyUserPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Path: /
+      ManagedPolicyName: irjS3Policy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 's3:Get*'
+            Resource: '*'
+      Users:
+        - !Ref MYUSER
+
+  MYUSER:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Ref UserName
+
+Outputs:
+  Policy:
+    Value: !Ref MyUserPolicy
+    Export:
+      Name: !Sub '${AWS::StackName}-Policy'

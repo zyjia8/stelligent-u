@@ -1,0 +1,12 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Pratice template from Irene Jia'
+
+Resources:
+  MYUSER:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: 'irjNewTestUser'
+      ManagedPolicyArns:
+        - !ImportValue irene-practice-stack-Policy
