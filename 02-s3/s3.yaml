@@ -1,0 +1,26 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Pratice template from Irene Jia'
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: 'The name of the S3 Bucket to create, make this unique'
+
+Resources:
+  S3BUCKET:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref BucketName
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'AES256'
+
+Outputs:
+  Bucket:
+    Description: S3 Bucket Name
+    Value: !Ref S3BUCKET
