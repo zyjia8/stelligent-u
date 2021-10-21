@@ -1,0 +1,46 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Pratice template from Irene Jia'
+
+Resources:
+
+  MyUserPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Path: /
+      ManagedPolicyName: irjS3Policy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 'iam:Get*'
+            Resource: '*'
+
+  MYRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS: arn:aws:iam::324320755747:root
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - !Ref MyUserPolicy
+      RoleName: 'ireneTestRole'
+
+  NEWRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS: arn:aws:iam::324320755747:root
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - !Ref MyUserPolicy
+      RoleName: 'ireneNewTestRole'
