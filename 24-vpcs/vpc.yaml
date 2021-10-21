@@ -1,0 +1,52 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Pratice template from Irene Jia'
+
+Parameters:
+  CIDR:
+    Type: String
+    Default: '10.0.0.0'
+
+Resources:
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock:  !Join ['/',[!Ref CIDR, '16']]
+      Tags:
+        - Key: "user"
+          Value: "Irene Jia"
+        - Key: "stelligent-u-lab"
+          Value: "4.1.4"
+
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock:  !Join ['/',[!Ref CIDR, '24']]
+      Tags:
+        - Key: "user"
+          Value: "Irene Jia"
+        - Key: "stelligent-u-lab"
+          Value: "4.1.4"
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: "user"
+          Value: "Irene Jia"
+        - Key: "stelligent-u-lab"
+          Value: "4.1.4"
+
+  AttachGateway:
+       Type: AWS::EC2::VPCGatewayAttachment
+       Properties:
+         VpcId: !Ref VPC
+         InternetGatewayId: !Ref InternetGateway
+
+Outputs:
+  VPC:
+    Value: !Ref VPC
+  Subnet:
+    Value: !Ref Subnet
