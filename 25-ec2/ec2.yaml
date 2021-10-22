@@ -1,0 +1,42 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Pratice template from Irene Jia'
+
+Resources:
+  WinInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref RequiredTagsLaunchTemplate
+        Version: 1
+      ImageId: ami-01b1af98c9c81c8cd
+      SubnetId: subnet-0cb1feb170d20436e
+
+  UbuntuInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref RequiredTagsLaunchTemplate
+        Version: 1
+      ImageId: ami-09e67e426f25ce0d7
+      SubnetId: subnet-0cb1feb170d20436e
+
+  RequiredTagsLaunchTemplate:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+      LaunchTemplateName: IreneLaunchTemplate
+      LaunchTemplateData:
+        InstanceType: t2.small
+        SecurityGroupIds:
+          - sg-029fb671e25e381c8
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: IreneTestInstances
+Outputs:
+  winHost:
+    Value: !Ref WinInstance
+  linuxHost:
+    Value: !Ref UbuntuInstance
