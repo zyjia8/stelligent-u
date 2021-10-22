@@ -10,7 +10,7 @@ Resources:
       LaunchTemplate:
         LaunchTemplateId: !Ref RequiredTagsLaunchTemplate
         Version: 1
-      ImageId: ami-01b1af98c9c81c8cd
+      ImageId: ami-05ed35b7ece2076f6
       SubnetId: subnet-0cb1feb170d20436e
 
   UbuntuInstance:
