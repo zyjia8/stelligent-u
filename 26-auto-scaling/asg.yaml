@@ -25,15 +25,17 @@ Resources:
         Roles: 
           - !Ref EC2Role
 
-  ASGLaunchConfiguration:
-    Type: AWS::AutoScaling::LaunchConfiguration
-    Properties: 
-      AssociatePublicIpAddress: False
-      IamInstanceProfile: !Ref Ec2SsmInstanceProfile
-      ImageId: ami-07d02ee1eeb0c996c
-      InstanceType: t2.medium
-      SecurityGroups: 
-        - sg-0c1617312e6017ae4
+  MyLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        IamInstanceProfile: 
+          Arn: !GetAtt Ec2SsmInstanceProfile.Arn
+        DisableApiTermination: true
+        ImageId: ami-07d02ee1eeb0c996c
+        InstanceType: t2.micro
+        SecurityGroupIds:
+          - sg-0c1617312e6017ae4
 
   MyASG:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -46,7 +48,9 @@ Resources:
       DesiredCapacity: 1
       HealthCheckGracePeriod: 60
       HealthCheckType: EC2
-      LaunchConfigurationName: !Ref ASGLaunchConfiguration
+      LaunchTemplate: 
+        LaunchTemplateId: !Ref MyLaunchTemplate
+        Version: !GetAtt MyLaunchTemplate.LatestVersionNumber
       MaxSize: 1
       MinSize: 1
       Tags: 
