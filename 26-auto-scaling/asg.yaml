@@ -1,0 +1,58 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Pratice template from Irene Jia'
+
+Resources:
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      RoleName: 'ireneEC2Role'
+  
+  Ec2SsmInstanceProfile:
+      Type: AWS::IAM::InstanceProfile
+      Properties: 
+        Path: /
+        Roles: 
+          - !Ref EC2Role
+
+  ASGLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties: 
+      AssociatePublicIpAddress: False
+      IamInstanceProfile: !Ref Ec2SsmInstanceProfile
+      ImageId: ami-07d02ee1eeb0c996c
+      InstanceType: t2.medium
+      SecurityGroups: 
+        - sg-0c1617312e6017ae4
+
+  MyASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    UpdatePolicy:
+      AutoScalingReplacingUpdate:
+        WillReplace: True
+    Properties: 
+      AvailabilityZones: 
+        - us-east-1a
+      DesiredCapacity: 1
+      HealthCheckGracePeriod: 60
+      HealthCheckType: EC2
+      LaunchConfigurationName: !Ref ASGLaunchConfiguration
+      MaxSize: 1
+      MinSize: 1
+      Tags: 
+        - Key: Name
+          PropagateAtLaunch: True
+          Value: IreneTestInstances
+      VPCZoneIdentifier: 
+        - subnet-05a27f6d0b0a1e195
+
