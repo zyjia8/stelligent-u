@@ -32,7 +32,7 @@ Resources:
         IamInstanceProfile: 
           Arn: !GetAtt Ec2SsmInstanceProfile.Arn
         DisableApiTermination: true
-        ImageId: ami-07d02ee1eeb0c996c
+        ImageId: ami-02e136e904f3da870
         InstanceType: t2.micro
         SecurityGroupIds:
           - sg-0c1617312e6017ae4
@@ -51,7 +51,7 @@ Resources:
       LaunchTemplate: 
         LaunchTemplateId: !Ref MyLaunchTemplate
         Version: !GetAtt MyLaunchTemplate.LatestVersionNumber
-      MaxSize: 1
+      MaxSize: 5
       MinSize: 1
       Tags: 
         - Key: Name
@@ -60,3 +60,56 @@ Resources:
       VPCZoneIdentifier: 
         - subnet-05a27f6d0b0a1e195
 
+  ASGScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref MyASG
+      Cooldown: 60
+      ScalingAdjustment: 1
+
+  ASGScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: "ChangeInCapacity"
+      AutoScalingGroupName: !Ref MyASG
+      Cooldown: 60
+      ScalingAdjustment: -1
+
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Scale-up if CPU > 20% for 2 minutes"
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 120
+      EvaluationPeriods: 1
+      Threshold: 20
+      AlarmActions: 
+        - !Ref ASGScaleUpPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref MyASG
+      ComparisonOperator: GreaterThanThreshold
+    
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+        AlarmDescription: "Scale-down if CPU < 10% for 2 minutes"
+        MetricName: CPUUtilization
+        Namespace: AWS/EC2
+        Statistic: Average
+        Period: 120
+        EvaluationPeriods: 1
+        Threshold: 10
+        AlarmActions: 
+        - !Ref ASGScaleDownPolicy
+        Dimensions:
+          - Name: AutoScalingGroupName
+            Value: !Ref MyASG
+        ComparisonOperator: LessThanThreshold
+
+Outputs:
+  MyASG:
+    Value: !Ref MyASG
