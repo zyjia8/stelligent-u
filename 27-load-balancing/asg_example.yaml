@@ -3,25 +3,28 @@ Resources:
   WebServerAsg:
     Type: 'AWS::AutoScaling::AutoScalingGroup'
     Properties:
-      AutoScalingGroupName: 'AutomationBoxes'
       VPCZoneIdentifier:
-        - 'REPLACE_WITH_PUBLIC_SUBNET_IN_AZ1' # Find public subnets within the default VPC or 
-        - 'REPLACE_WITH_PUBLIC_SUBNET_IN_AZ2'
+        - subnet-02ca7cb231c76c554 # Find public subnets within the default VPC or 
+        - subnet-0b94bee36b9a5fb63
       DesiredCapacity: '3'
       HealthCheckType: 'ELB'
       HealthCheckGracePeriod: 30 
       LaunchConfigurationName: !Ref WebServersLC
       MaxSize: '3'
       MinSize: '3'
-
+      TargetGroupARNs: [!Ref ApplicationTargetGroup, !Ref ApplicationTargetGroup2]
+      Tags: 
+        - Key: Name
+          PropagateAtLaunch: True
+          Value: IreneTestInstances
+   
   WebServersLC:
     Type: 'AWS::AutoScaling::LaunchConfiguration'
     Properties:
-      ImageId: 'REPLACE_WITH_AMAZON_LINUXV1_AMI'
+      ImageId: ami-0256a65b441b3a099
       InstanceType: 't2.micro'
-      LaunchConfigurationName: 'SimpleWebServerLC'
       SecurityGroups:
-        - 'REPLACE'
+        - sg-0bd4c92c9a715aa88
       UserData: 
         Fn::Base64:
           Fn::Sub: |
@@ -62,3 +65,76 @@ Resources:
               nginx:
                 enabled: 'true'
                 ensureRunning: 'true'
+
+  MyLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: IreneALB
+      Subnets:
+        - subnet-02ca7cb231c76c554 # Find public subnets within the default VPC or 
+        - subnet-0b94bee36b9a5fb63
+      SecurityGroups:
+        - sg-0bd4c92c9a715aa88
+      Tags:
+        - Key: Name
+          Value: IreneTestInstances
+
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref MyLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ApplicationTargetGroup
+
+  ApplicationTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 15
+      HealthyThresholdCount: 5
+      HealthCheckPath: /index.html
+      UnhealthyThresholdCount: 3
+      Matcher:
+        HttpCode: '200'
+      VpcId: vpc-0eda4c5321822a055
+      Name: ApplicationTargetGroup
+      Port: 80
+      Protocol: HTTP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: '20'
+
+  LoadBalancerListener2:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref MyLoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: arn:aws:acm:us-east-1:324320755747:certificate/4aba339c-b89f-4344-bd68-c2dbf95f1c8d
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ApplicationTargetGroup2
+
+  ApplicationTargetGroup2:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckProtocol: HTTPS
+      HealthCheckTimeoutSeconds: 15
+      HealthyThresholdCount: 5
+      HealthCheckPath: /index.html
+      UnhealthyThresholdCount: 3
+      Matcher:
+        HttpCode: '200'
+      VpcId: vpc-0eda4c5321822a055
+      Name: ApplicationTargetGroup2
+      Port: 443
+      Protocol: HTTPS
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: '20'
