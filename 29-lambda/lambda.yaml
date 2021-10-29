@@ -72,6 +72,13 @@ Resources:
       ResourceId: !Ref ApiGatewayResource
       RestApiId: !Ref apiGateway
 
+  apiGatewayModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      ContentType: 'application/json'
+      RestApiId: !Ref apiGateway
+      Schema: {}
+
   apiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
@@ -86,11 +93,14 @@ Resources:
       Code:
         ZipFile: |
           def handler(event,context):
-            return {
-              'body': '=='.join(event),
+            response = {
+              'isBase64Encoded': False,
+              'statusCode': 200,
               'headers': {},
-              'statusCode': 200
+              'multiValueHeaders': {},
+              'body': 'Hello, World!'
             }
+            return response
       Description: Example Lambda function
       FunctionName: ireneGateway
       Handler: index.handler
