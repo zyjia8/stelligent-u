@@ -39,14 +39,13 @@ Resources:
             Service: lambda.amazonaws.com
           Action: sts:AssumeRole
       ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/AWSLambda_FullAccess
-      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       RoleName: 'ireneLambdaRole'
 
   apiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      ApiKeySourceType: HEADER
       Description: Irene API Gateway
       EndpointConfiguration:
         Types:
@@ -60,7 +59,7 @@ Resources:
       AuthorizationType: NONE
       HttpMethod: POST
       Integration:
-        Credentials: !GetAtt ApiGatewayIamRole.Arn
+        # Credentials: !GetAtt ApiGatewayIamRole.Arn
         ConnectionType: INTERNET
         IntegrationHttpMethod: POST
         PassthroughBehavior: WHEN_NO_MATCH
@@ -92,13 +91,24 @@ Resources:
     Properties:
       Code:
         ZipFile: |
+          import boto3
+          import json
+
           def handler(event,context):
+            client = boto3.client('dynamodb')
+            input = json.loads(event["body"])
+            output=client.put_item(
+              TableName='ireneTestTable',
+              Item={
+                'uid': {'S':input['uid']},
+                'Name':{'S':input['Name']}
+              })
             response = {
               'isBase64Encoded': False,
               'statusCode': 200,
               'headers': {},
               'multiValueHeaders': {},
-              'body': 'Hello, World!'
+              'body': json.dumps(output)
             }
             return response
       Description: Example Lambda function
@@ -123,4 +133,22 @@ Resources:
       Principal: apigateway.amazonaws.com
       # note: if route *not* at API Gateway root, `SourceArn` would take the form of:
       #               arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/${apiGatewayStageName}/${apiGatewayHTTPMethod}/PATH_PART
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/*/ireneGateway
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*
+
+  myDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ireneTestTable
+      AttributeDefinitions:
+        - AttributeName: "uid"
+          AttributeType: "S"
+        - AttributeName: "Name"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "uid"
+          KeyType: HASH
+        - AttributeName: "Name"
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
