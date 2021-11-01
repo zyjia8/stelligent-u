@@ -1,0 +1,33 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Pratice template from Irene Jia'
+
+Resources:
+
+  Name:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Description: SSM Parameter for one engineer info
+      Name: /Irene-Jia-Training/stelligent-u/lab11/engineers/Irene/Name
+      Type: String
+      Value: Irene Jia
+      AllowedPattern: ^[a-zA-Z0-9\s]*$
+
+  Team:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Description: SSM Parameter for one engineer info
+      Name: /Irene-Jia-Training/stelligent-u/lab11/engineers/Irene/Team
+      Type: String
+      Value: Bench
+      AllowedPattern: ^[a-zA-Z0-9]*$
+
+  Timezone:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Description: SSM Parameter for one engineer info
+      Name: /Irene-Jia-Training/stelligent-u/lab11/engineers/Irene/Timezone
+      Type: String
+      Value: PST
+      AllowedPattern: ^[a-zA-Z0-9]*$
