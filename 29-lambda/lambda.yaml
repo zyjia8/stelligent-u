@@ -70,13 +70,26 @@ Resources:
           - lambdaArn: !GetAtt lambdaFunction.Arn
       ResourceId: !Ref ApiGatewayResource
       RestApiId: !Ref apiGateway
+      RequestModels: 
+        - $default: !Ref apiGatewayModel
 
   apiGatewayModel:
     Type: AWS::ApiGateway::Model
     Properties:
       ContentType: 'application/json'
       RestApiId: !Ref apiGateway
-      Schema: {}
+      Schema:
+        $schema: 'http://json-schema.org/draft-04/schema#'
+        title: apiGatewayModel
+        type: array
+        items:
+          type: object
+          properties:
+            uid:
+              type: string
+            Name:
+              type: string
+        required: ["uid","Name"]
 
   apiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment

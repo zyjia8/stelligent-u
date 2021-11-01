@@ -1,2 +1,4 @@
-aws cloudformation create-stack --capabilities CAPABILITY_NAMED_IAM --stack-name irene-practice-stack --template-body file://25-ec2/ec2.yaml
-aws cloudformation wait stack-update-complete --stack-name irene-practice-stack
+aws cloudformation deploy --capabilities CAPABILITY_NAMED_IAM --stack-name irene-practice-stack --template-file ./31-parameter-store/ssm.yaml
+
+
+aws apigateway test-invoke-method --rest-api-id sqf85psnhd --resource-id ilqyls --http-method GET --path-with-query-string '/' --body "hello"
