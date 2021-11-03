@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+    CodePipelineRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AdministratorAccess
+
+    CloudformationRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+    AppPipeline: 
+      Type: AWS::CodePipeline::Pipeline 
+      Properties: 
+        ArtifactStore:
+          Type: S3
+          Location: codepipeline-us-east-1-736128026223
+        RestartExecutionOnUpdate: true        
+        RoleArn: !GetAtt CodePipelineRole.Arn
+        Stages: 
+          - Name: Source 
+            Actions: 
+              - Name: SourceAction
+                ActionTypeId: 
+                  Category: Source 
+                  Owner: AWS 
+                  Version: 1 
+                  Provider: CodeStarSourceConnection 
+                OutputArtifacts: 
+                  - Name: SourceOutput 
+                Configuration: 
+                  BranchName: master 
+                  FullRepositoryId: zyjia8/stelligent-u 
+                  ConnectionArn: arn:aws:codestar-connections:us-east-1:324320755747:connection/572233b6-c77c-45c6-9fcd-10055a71ce5b
+                RunOrder: 1 
+          - Name: Deploy 
+            Actions: 
+              - Name: DeployAction
+                InputArtifacts: 
+                  - Name: SourceOutput 
+                ActionTypeId: 
+                  Category: Deploy 
+                  Owner: AWS 
+                  Version: 1
+                  Provider: CloudFormation 
+                Configuration: 
+                  ActionMode: CREATE_UPDATE
+                  Capabilities: CAPABILITY_IAM
+                  RoleArn: !GetAtt CloudformationRole.Arn
+                  StackName: IrenePipelineProject
+                  TemplatePath: !Sub "SourceOutput::02-codepipeline/bucket.yaml"
+                RunOrder: 1 
+        Tags:
+          - Key: Project
+            Value: IreneTestProject
