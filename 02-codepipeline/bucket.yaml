@@ -3,6 +3,7 @@ Parameters:
   BucketNameParameter:
     Type: String
     Description: S3 Bucket Name
+    Default: irene-jia-pipeline-bucket
 Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
