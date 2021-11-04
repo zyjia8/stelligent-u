@@ -1,0 +1,6 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+       - aws cloudformation validate-template --template-body file://${CODEBUILD_SRC_DIR}/02-codepipeline/bucket.yaml

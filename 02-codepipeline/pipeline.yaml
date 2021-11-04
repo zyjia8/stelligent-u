@@ -9,7 +9,9 @@ Resources:
           Statement:
             Effect: Allow
             Principal:
-              Service: codepipeline.amazonaws.com
+              Service: 
+                - codepipeline.amazonaws.com
+                - codebuild.amazonaws.com
             Action: sts:AssumeRole
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AdministratorAccess
@@ -25,7 +27,23 @@ Resources:
               Service: cloudformation.amazonaws.com
             Action: sts:AssumeRole
         ManagedPolicyArns:
-          - arn:aws:iam::aws:policy/AmazonS3FullAccess
+          - arn:aws:iam::aws:policy/AdministratorAccess
+    
+    MyBuildProject:
+        Type: AWS::CodeBuild::Project
+        Properties:
+          Artifacts:
+            Type: CODEPIPELINE
+          Description: Linting CloudFormation templates
+          Environment:
+            ComputeType: BUILD_GENERAL1_SMALL
+            Image: aws/codebuild/standard:3.0
+            Type: LINUX_CONTAINER
+          ServiceRole: !GetAtt CodePipelineRole.Arn
+          Source:
+            Type: CODEPIPELINE
+            BuildSpec: 02-codepipeline/buildspec.yml
+          TimeoutInMinutes: 20
 
     AppPipeline: 
       Type: AWS::CodePipeline::Pipeline 
@@ -51,6 +69,20 @@ Resources:
                   FullRepositoryId: zyjia8/stelligent-u 
                   ConnectionArn: arn:aws:codestar-connections:us-east-1:324320755747:connection/572233b6-c77c-45c6-9fcd-10055a71ce5b
                 RunOrder: 1 
+          - Name: Build
+            Actions:
+              - Name: Validate
+                ActionTypeId:
+                  Category: Build
+                  Owner: AWS
+                  Provider: CodeBuild
+                  Version: 1
+                Configuration:
+                  BatchEnabled: false
+                  ProjectName: !Ref MyBuildProject
+                InputArtifacts:
+                  - Name: SourceOutput
+                RunOrder: 1
           - Name: Deploy 
             Actions: 
               - Name: DeployAction
