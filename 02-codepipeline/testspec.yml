@@ -1,0 +1,9 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - apt-get install jq
+  build:
+    commands:
+       - aws cloudformation describe-stacks --stack-name ${AWS_STACK_NAME} | jq -r .Stacks[].StackStatus
