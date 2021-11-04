@@ -8,10 +8,16 @@ Resources:
           - 
             AttributeName: "Album"
             AttributeType: "S"
+          - 
+            AttributeName: "Artist"
+            AttributeType: "S"
         KeySchema: 
           - 
             AttributeName: "Album"
             KeyType: "HASH"
+          - 
+            AttributeName: "Artist"
+            KeyType: "RANGE"
         ProvisionedThroughput: 
           ReadCapacityUnits: "5"
           WriteCapacityUnits: "5"
