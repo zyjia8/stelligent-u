@@ -56,6 +56,8 @@ Resources:
           - Name: CreateChangeset
             Actions:
               - Name: CreateChangeset
+                InputArtifacts: 
+                  - Name: SourceOutput 
                 ActionTypeId:
                   Category: Deploy
                   Owner: AWS
@@ -65,6 +67,7 @@ Resources:
                   ActionMode: CHANGE_SET_REPLACE
                   Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
                   RoleArn: !GetAtt CloudformationRole.Arn
+                  ChangeSetName: pipeline-changeset
                   StackName: irene-application-stack
                   TemplatePath: !Sub "SourceOutput::02-codepipeline/application.yaml"
                 RunOrder: 1 
@@ -90,6 +93,7 @@ Resources:
                 Configuration: 
                   ActionMode: CHANGE_SET_EXECUTE
                   Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
+                  ChangeSetName: pipeline-changeset
                   RoleArn: !GetAtt CloudformationRole.Arn
                   StackName: irene-application-stack
                   TemplatePath: !Sub "SourceOutput::02-codepipeline/application.yaml"
