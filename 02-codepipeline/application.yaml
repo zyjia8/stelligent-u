@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+    AppDynamoTable:
+      Type: AWS::DynamoDB::Table
+      Properties: 
+        AttributeDefinitions: 
+          - 
+            AttributeName: "Album"
+            AttributeType: "S"
+        KeySchema: 
+          - 
+            AttributeName: "Album"
+            KeyType: "HASH"
+        ProvisionedThroughput: 
+          ReadCapacityUnits: "5"
+          WriteCapacityUnits: "5"
+
+    ApplicationRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            Effect: Allow
+            Principal:
+              Service: 
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+    
+    Application:
+        Type: AWS::Lambda::Function
+        Properties:
+          Runtime: python3.8
+          Timeout: 5
+          Handler: index.handler
+          Role: !GetAtt ApplicationRole.Arn
+          Code:
+            ZipFile:
+              !Sub
+                - |-
+                  import boto3
+
+                  def handler(event, context):
+                    client = boto3.client('dynamodb')
+                    response = client.get_item(
+                        TableName=${dynamo_table_name},
+                        Key={
+                            'Album': {'S': event['album']},
+                            'Artist': {'S': event['artist']}
+                        }
+                    )
+                    print(response['Item'])
+                -
+                  dynamo_table_name: !Ref AppDynamoTable
